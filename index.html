@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor do Portal da Transparência | Coren-GO</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #172033;
+    }
+
+    header {
+      background: #245b9e;
+      color: white;
+      padding: 32px 20px;
+    }
+
+    .container {
+      width: min(1100px, calc(100% - 32px));
+      margin: auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+    }
+
+    main {
+      padding: 28px 0;
+    }
+
+    .aviso {
+      background: #eef5ff;
+      border: 1px solid #cfe1f7;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid #e4e7ec;
+    }
+
+    .titulo {
+      font-size: 13px;
+      color: #667085;
+      text-transform: uppercase;
+    }
+
+    .numero {
+      margin-top: 8px;
+      font-size: 34px;
+      font-weight: bold;
+    }
+
+    .verde { color: #1f9d63; }
+    .amarelo { color: #d9a514; }
+    .vermelho { color: #d64545; }
+    .azul { color: #245b9e; }
+
+    .conformidade {
+      margin-top: 22px;
+      background: white;
+      padding: 22px;
+      border-radius: 14px;
+      border: 1px solid #e4e7ec;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 24px;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th, td {
+      padding: 14px;
+      border-bottom: 1px solid #e4e7ec;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+    }
+
+    @media (max-width: 800px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 500px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="container">
+    <h1>Monitor do Portal da Transparência</h1>
+    <p>Coren-GO | Verificação estrutural das obrigações de transparência</p>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="aviso">
+    <strong>Escopo atual:</strong>
+    esta análise verifica se os itens exigidos foram identificados no Portal.
+    Ainda não verifica atualização documental ou cumprimento dos prazos.
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="titulo">Obrigações verificadas</div>
+      <div class="numero azul">32</div>
+    </div>
+
+    <div class="card">
+      <div class="titulo">Completas</div>
+      <div class="numero verde">25</div>
+    </div>
+
+    <div class="card">
+      <div class="titulo">Parciais</div>
+      <div class="numero amarelo">4</div>
+    </div>
+
+    <div class="card">
+      <div class="titulo">Não identificadas</div>
+      <div class="numero vermelho">3</div>
+    </div>
+
+  </div>
+
+  <div class="conformidade">
+    <div class="titulo">Conformidade integral</div>
+    <div class="numero verde">78,1%</div>
+    <p>Índice estrutural ponderado: <strong>84,4%</strong></p>
+  </div>
+
+  <h2>Pontos para verificação</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Situação</th>
+        <th>Obrigação</th>
+        <th>Resultado</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr>
+        <td class="vermelho">🔴 Não identificado</td>
+        <td>Centro de Custo</td>
+        <td>Nenhuma correspondência localizada.</td>
+      </tr>
+
+      <tr>
+        <td class="vermelho">🔴 Não identificado</td>
+        <td>Contatos dos empregados</td>
+        <td>Nenhuma correspondência localizada.</td>
+      </tr>
+
+      <tr>
+        <td class="vermelho">🔴 Não identificado</td>
+        <td>Boletim Informativo</td>
+        <td>Nenhuma correspondência localizada.</td>
+      </tr>
+
+      <tr>
+        <td class="amarelo">🟡 Parcial</td>
+        <td>Obras / Aquisições</td>
+        <td>Obras localizada; Aquisições não localizada.</td>
+      </tr>
+
+      <tr>
+        <td class="amarelo">🟡 Parcial</td>
+        <td>Plano de Cargos e Salários / Acordo Coletivo</td>
+        <td>Acordo Coletivo localizado; Plano de Cargos e Salários não localizado.</td>
+      </tr>
+
+      <tr>
+        <td class="amarelo">🟡 Parcial</td>
+        <td>Remuneração dos Empregados e Estagiários</td>
+        <td>Remuneração dos empregados localizada; estagiários não identificados.</td>
+      </tr>
+
+      <tr>
+        <td class="amarelo">🟡 Parcial</td>
+        <td>Pessoal com cargos e currículo</td>
+        <td>Relação de empregados com cargos localizada; currículo não identificado.</td>
+      </tr>
+
+    </tbody>
+  </table>
+
+</main>
+
+</body>
+</html>
