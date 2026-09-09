@@ -10,6 +10,21 @@ headers = {
     )
 }
 
+itens = [
+    {
+        "nome": "ORGANOGRAMA",
+        "prazo": "Quando houver atualização"
+    },
+    {
+        "nome": "COMPETÊNCIAS",
+        "prazo": "Quando houver atualização"
+    },
+    {
+        "nome": "PROJETOS",
+        "prazo": "Anual"
+    }
+]
+
 print("Iniciando verificação do Portal da Transparência do Coren Goiás...")
 
 try:
@@ -20,14 +35,23 @@ try:
     )
 
     if resposta.status_code == 200:
-        print("✅ Portal acessado com sucesso.")
+        print("✅ Portal acessado com sucesso.\n")
 
         conteudo = resposta.text.upper()
 
-        if "ORGANOGRAMA" in conteudo:
-            print("✅ ORGANOGRAMA encontrado no Portal.")
-        else:
-            print("❌ ORGANOGRAMA não encontrado no conteúdo inicial do Portal.")
+        for item in itens:
+            nome = item["nome"]
+            prazo = item["prazo"]
+
+            print(f"Verificando: {nome}")
+
+            if nome in conteudo:
+                print("✅ Item encontrado no Portal.")
+            else:
+                print("❌ Item não encontrado no Portal.")
+
+            print(f"Prazo previsto: {prazo}")
+            print("-----------------------------")
 
     else:
         print(f"❌ Erro ao acessar o Portal. Código: {resposta.status_code}")
