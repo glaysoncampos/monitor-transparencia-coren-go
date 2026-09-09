@@ -18,6 +18,7 @@ def normalizar(texto):
     texto = texto.upper()
 
     texto = unicodedata.normalize("NFD", texto)
+
     texto = "".join(
         caractere
         for caractere in texto
@@ -29,22 +30,25 @@ def normalizar(texto):
 
 obrigacoes = [
 
+    # ============================================================
     # INSTITUCIONAL
+    # ============================================================
 
     {
         "menu": "INSTITUCIONAL",
         "obrigacao_pdf": "Organograma",
-        "procurar": ["ORGANOGRAMA"],
+        "componentes": [
+            ["ORGANOGRAMA"]
+        ],
         "prazo": "Quando houver atualização"
     },
 
     {
         "menu": "INSTITUCIONAL",
         "obrigacao_pdf": "Competências / Regimento Interno",
-        "procurar": [
-            "COMPETENCIAS",
-            "REGIMENTO INTERNO",
-            "REGIMENTO INTERNO COREN-GO"
+        "componentes": [
+            ["COMPETENCIAS"],
+            ["REGIMENTO INTERNO", "REGIMENTO INTERNO COREN-GO"]
         ],
         "prazo": "Quando houver atualização"
     },
@@ -52,10 +56,10 @@ obrigacoes = [
     {
         "menu": "INSTITUCIONAL",
         "obrigacao_pdf": "Endereço / Horário / Prazo para prestação de serviços",
-        "procurar": [
-            "CONSELHO REGIONAL",
-            "HORARIO DE ATENDIMENTO",
-            "PRAZO PARA PRESTACAO DOS SERVICOS"
+        "componentes": [
+            ["CONSELHO REGIONAL", "ENDERECO"],
+            ["HORARIO DE ATENDIMENTO"],
+            ["PRAZO PARA PRESTACAO DOS SERVICOS"]
         ],
         "prazo": "Quando houver atualização"
     },
@@ -63,10 +67,10 @@ obrigacoes = [
     {
         "menu": "INSTITUCIONAL",
         "obrigacao_pdf": "Projetos, Programas e Ações",
-        "procurar": [
-            "PROJETOS",
-            "PROGRAMAS",
-            "ACOES"
+        "componentes": [
+            ["PROJETOS"],
+            ["PROGRAMAS"],
+            ["ACOES"]
         ],
         "prazo": "Anual"
     },
@@ -74,40 +78,41 @@ obrigacoes = [
     {
         "menu": "INSTITUCIONAL",
         "obrigacao_pdf": "Plenário / Diretoria / Reuniões / Calendário / Atas / Agenda / Pareceres",
-        "procurar": [
-            "PLENARIO",
-            "DIRETORIA",
-            "ATAS DO PLENARIO",
-            "AGENDA DA PRESIDENTE",
-            "PARECERES"
+        "componentes": [
+            ["PLENARIO"],
+            ["DIRETORIA"],
+            ["CALENDARIO DE REUNIOES", "REUNIOES"],
+            ["ATAS DO PLENARIO", "ATAS"],
+            ["AGENDA DA PRESIDENTE", "AGENDA"],
+            ["PARECERES"]
         ],
         "prazo": "Mensal"
     },
 
+    # ============================================================
     # LEGISLAÇÃO
+    # ============================================================
 
     {
         "menu": "LEGISLAÇÃO",
         "obrigacao_pdf": "Portarias / Resolução / Leis",
-        "procurar": [
-            "PORTARIAS",
-            "RESOLUCOES",
-            "LEIS"
+        "componentes": [
+            ["PORTARIAS"],
+            ["RESOLUCOES", "RESOLUCAO"],
+            ["LEIS"]
         ],
         "prazo": "Mensal"
     },
 
+    # ============================================================
     # FINANCEIRO
+    # ============================================================
 
     {
         "menu": "FINANCEIRO",
         "obrigacao_pdf": "Demonstrações Contábeis",
-        "procurar": [
-            "DEMONSTRACOES CONTABEIS",
-            "BALANCETE",
-            "BALANCO FINANCEIRO",
-            "BALANCO PATRIMONIAL",
-            "BALANCO ORCAMENTARIO"
+        "componentes": [
+            ["DEMONSTRACOES CONTABEIS", "BALANCETE"]
         ],
         "prazo": "Mensal"
     },
@@ -115,10 +120,9 @@ obrigacoes = [
     {
         "menu": "FINANCEIRO",
         "obrigacao_pdf": "Demonstração de Despesas e Receitas",
-        "procurar": [
-            "DEMONSTRACOES DE DESPESAS E RECEITAS",
-            "COMPARATIVO DE RECEITA",
-            "COMPARATIVO DE DESPESAS"
+        "componentes": [
+            ["COMPARATIVO DE RECEITA", "RECEITAS"],
+            ["COMPARATIVO DE DESPESAS", "DESPESAS"]
         ],
         "prazo": "Trimestral"
     },
@@ -126,9 +130,8 @@ obrigacoes = [
     {
         "menu": "FINANCEIRO",
         "obrigacao_pdf": "Relação de Empenhos",
-        "procurar": [
-            "RELACAO DE EMPENHOS",
-            "EMPENHOS"
+        "componentes": [
+            ["RELACAO DE EMPENHOS", "EMPENHOS"]
         ],
         "prazo": "Mensal"
     },
@@ -136,21 +139,22 @@ obrigacoes = [
     {
         "menu": "FINANCEIRO",
         "obrigacao_pdf": "Centro de Custo",
-        "procurar": [
-            "CENTRO DE CUSTO",
-            "CENTRO DE CUSTOS"
+        "componentes": [
+            ["CENTRO DE CUSTO", "CENTRO DE CUSTOS"]
         ],
         "prazo": "Mensal"
     },
 
+    # ============================================================
     # RELATÓRIOS
+    # ============================================================
 
     {
         "menu": "RELATÓRIOS",
         "obrigacao_pdf": "Documentos Classificados e Desclassificados",
-        "procurar": [
-            "DOCUMENTOS CLASSIFICADOS",
-            "DOCUMENTOS DESCLASSIFICADOS"
+        "componentes": [
+            ["DOCUMENTOS CLASSIFICADOS"],
+            ["DOCUMENTOS DESCLASSIFICADOS"]
         ],
         "prazo": "Mensal"
     },
@@ -158,9 +162,8 @@ obrigacoes = [
     {
         "menu": "RELATÓRIOS",
         "obrigacao_pdf": "Controle Externo",
-        "procurar": [
-            "CONTROLE EXTERNO",
-            "TCU"
+        "componentes": [
+            ["CONTROLE EXTERNO", "TCU"]
         ],
         "prazo": "Anual"
     },
@@ -168,22 +171,23 @@ obrigacoes = [
     {
         "menu": "RELATÓRIOS",
         "obrigacao_pdf": "Controle Interno",
-        "procurar": [
-            "CONTROLE INTERNO",
-            "PLANO DE ATIVIDADES DA CONTROLADORIA"
+        "componentes": [
+            ["CONTROLE INTERNO", "PLANO DE ATIVIDADES DA CONTROLADORIA"]
         ],
         "prazo": "Semestral"
     },
 
+    # ============================================================
     # LICITAÇÕES
+    # ============================================================
 
     {
         "menu": "LICITAÇÕES",
         "obrigacao_pdf": "Licitações / Dispensas e Inexigibilidades",
-        "procurar": [
-            "LICITACOES",
-            "DISPENSA",
-            "INEXIGIBILIDADE"
+        "componentes": [
+            ["LICITACOES"],
+            ["DISPENSA"],
+            ["INEXIGIBILIDADE"]
         ],
         "prazo": "Mensal"
     },
@@ -191,58 +195,71 @@ obrigacoes = [
     {
         "menu": "LICITAÇÕES",
         "obrigacao_pdf": "Contratos",
-        "procurar": ["CONTRATOS"],
+        "componentes": [
+            ["CONTRATOS"]
+        ],
         "prazo": "Mensal"
     },
 
     {
         "menu": "LICITAÇÕES",
         "obrigacao_pdf": "Convênios",
-        "procurar": ["CONVENIOS"],
+        "componentes": [
+            ["CONVENIOS"]
+        ],
         "prazo": "Mensal"
     },
 
     {
         "menu": "LICITAÇÕES",
         "obrigacao_pdf": "Obras / Aquisições",
-        "procurar": [
-            "OBRAS",
-            "AQUISICOES"
+        "componentes": [
+            ["OBRAS"],
+            ["AQUISICOES"]
         ],
         "prazo": "Quando houver"
     },
 
+    # ============================================================
     # VIAGENS
+    # ============================================================
 
     {
         "menu": "VIAGENS",
         "obrigacao_pdf": "Passagens",
-        "procurar": ["PASSAGENS"],
+        "componentes": [
+            ["PASSAGENS"]
+        ],
         "prazo": "Mensal"
     },
 
     {
         "menu": "VIAGENS",
         "obrigacao_pdf": "Diárias",
-        "procurar": ["DIARIAS"],
+        "componentes": [
+            ["DIARIAS"]
+        ],
         "prazo": "Mensal"
     },
 
     {
         "menu": "VIAGENS",
         "obrigacao_pdf": "Auxílio Representação",
-        "procurar": ["AUXILIO REPRESENTACAO"],
+        "componentes": [
+            ["AUXILIO REPRESENTACAO"]
+        ],
         "prazo": "Mensal"
     },
 
+    # ============================================================
     # GESTÃO DE PESSOAS
+    # ============================================================
 
     {
         "menu": "GESTÃO DE PESSOAS",
         "obrigacao_pdf": "Contatos dos empregados",
-        "procurar": [
-            "CONTATOS",
-            "CONTATO PROFISSIONAL"
+        "componentes": [
+            ["CONTATOS", "CONTATO PROFISSIONAL"]
         ],
         "prazo": "Quando houver mudança"
     },
@@ -250,10 +267,9 @@ obrigacoes = [
     {
         "menu": "GESTÃO DE PESSOAS",
         "obrigacao_pdf": "Plano de Cargos e Salários / Acordo Coletivo",
-        "procurar": [
-            "PLANO DE CARGOS",
-            "PLANO DE CARGOS E SALARIOS",
-            "ACORDO COLETIVO"
+        "componentes": [
+            ["PLANO DE CARGOS", "PLANO DE CARGOS E SALARIOS"],
+            ["ACORDO COLETIVO"]
         ],
         "prazo": "Quando houver atualização"
     },
@@ -261,10 +277,9 @@ obrigacoes = [
     {
         "menu": "GESTÃO DE PESSOAS",
         "obrigacao_pdf": "Remuneração dos Empregados e Estagiários",
-        "procurar": [
-            "REMUNERACAO DE EMPREGADOS",
-            "REMUNERACAO DOS EMPREGADOS",
-            "ESTAGIARIOS"
+        "componentes": [
+            ["REMUNERACAO DE EMPREGADOS", "REMUNERACAO DOS EMPREGADOS"],
+            ["ESTAGIARIOS"]
         ],
         "prazo": "Mensal"
     },
@@ -272,9 +287,8 @@ obrigacoes = [
     {
         "menu": "GESTÃO DE PESSOAS",
         "obrigacao_pdf": "Jetons",
-        "procurar": [
-            "JETON",
-            "JETONS"
+        "componentes": [
+            ["JETON", "JETONS"]
         ],
         "prazo": "Mensal"
     },
@@ -282,22 +296,22 @@ obrigacoes = [
     {
         "menu": "GESTÃO DE PESSOAS",
         "obrigacao_pdf": "Pessoal com cargos e currículo",
-        "procurar": [
-            "RELACAO DOS EMPREGADOS COM CARGOS",
-            "PESSOAL COM CARGOS",
-            "CURRICULO"
+        "componentes": [
+            ["RELACAO DOS EMPREGADOS COM CARGOS", "PESSOAL COM CARGOS"],
+            ["CURRICULO"]
         ],
         "prazo": "Quando houver alteração"
     },
 
+    # ============================================================
     # PRESTAÇÃO DE CONTAS
+    # ============================================================
 
     {
         "menu": "PRESTAÇÃO DE CONTAS",
         "obrigacao_pdf": "Relatórios de Gestão",
-        "procurar": [
-            "RELATORIO DE GESTAO",
-            "RELATORIOS DE GESTAO"
+        "componentes": [
+            ["RELATORIO DE GESTAO", "RELATORIOS DE GESTAO"]
         ],
         "prazo": "Anual"
     },
@@ -305,18 +319,21 @@ obrigacoes = [
     {
         "menu": "PRESTAÇÃO DE CONTAS",
         "obrigacao_pdf": "Boletim Informativo",
-        "procurar": ["BOLETIM INFORMATIVO"],
+        "componentes": [
+            ["BOLETIM INFORMATIVO"]
+        ],
         "prazo": "Trimestral"
     },
 
+    # ============================================================
     # PEDIDOS DE INFORMAÇÃO
+    # ============================================================
 
     {
         "menu": "PEDIDOS DE INFORMAÇÃO",
         "obrigacao_pdf": "e-SIC",
-        "procurar": [
-            "E-SIC",
-            "ESIC"
+        "componentes": [
+            ["E-SIC", "ESIC"]
         ],
         "prazo": "Quando houver alteração"
     },
@@ -324,9 +341,8 @@ obrigacoes = [
     {
         "menu": "PEDIDOS DE INFORMAÇÃO",
         "obrigacao_pdf": "Cartilha da CGU",
-        "procurar": [
-            "CARTILHA DA CGU",
-            "CARTILHA DA CGU PARA ACESSO A INFORMACAO"
+        "componentes": [
+            ["CARTILHA DA CGU", "CARTILHA DA CGU PARA ACESSO A INFORMACAO"]
         ],
         "prazo": "Sem prazo definido no anexo"
     },
@@ -334,10 +350,8 @@ obrigacoes = [
     {
         "menu": "PEDIDOS DE INFORMAÇÃO",
         "obrigacao_pdf": "Relatório Ouvidoria",
-        "procurar": [
-            "OUVIDORIA",
-            "RELATORIO OUVIDORIA",
-            "RELATORIO DA OUVIDORIA"
+        "componentes": [
+            ["OUVIDORIA", "RELATORIO OUVIDORIA", "RELATORIO DA OUVIDORIA"]
         ],
         "prazo": "Mensal"
     },
@@ -345,32 +359,31 @@ obrigacoes = [
     {
         "menu": "PEDIDOS DE INFORMAÇÃO",
         "obrigacao_pdf": "Perguntas Frequentes",
-        "procurar": [
-            "PERGUNTAS FREQUENTES",
-            "FAQ"
+        "componentes": [
+            ["PERGUNTAS FREQUENTES", "FAQ"]
         ],
         "prazo": "Anual"
     },
 
+    # ============================================================
     # DADOS ABERTOS
+    # ============================================================
 
     {
         "menu": "DADOS ABERTOS",
         "obrigacao_pdf": "Catálogo de Dados Abertos / PDA",
-        "procurar": [
-            "DADOS ABERTOS",
-            "CATALOGO DE DADOS ABERTOS",
-            "PDA",
-            "PLANO DE DADOS ABERTOS"
+        "componentes": [
+            ["PDA", "PLANO DE DADOS ABERTOS"],
+            ["CATALOGO DE DADOS ABERTOS", "DADOS ABERTOS"]
         ],
         "prazo": "Quando houver atualização"
     }
 ]
 
 
-print("=" * 70)
-print("MONITOR DO PORTAL DA TRANSPARÊNCIA DO COREN GOIÁS")
-print("=" * 70)
+print("=" * 72)
+print("AUDITORIA ESTRUTURAL DO PORTAL DA TRANSPARÊNCIA DO COREN GOIÁS")
+print("=" * 72)
 
 try:
 
@@ -382,12 +395,13 @@ try:
 
     resposta.raise_for_status()
 
-    print("\n✅ Portal acessado com sucesso.\n")
+    print("\n✅ Portal acessado com sucesso.")
 
     conteudo = normalizar(resposta.text)
 
-    encontrados = 0
-    nao_encontrados = 0
+    completos = 0
+    parciais = 0
+    ausentes = 0
 
     menu_atual = None
 
@@ -398,65 +412,117 @@ try:
             menu_atual = item["menu"]
 
             print("\n")
-            print("=" * 70)
+            print("=" * 72)
             print(menu_atual)
-            print("=" * 70)
+            print("=" * 72)
 
-        termos_encontrados = []
+        componentes_encontrados = []
+        componentes_ausentes = []
 
-        for termo in item["procurar"]:
+        for componente in item["componentes"]:
 
-            termo_normalizado = normalizar(termo)
+            encontrou_componente = False
+            termo_encontrado = None
 
-            if termo_normalizado in conteudo:
-                termos_encontrados.append(termo)
+            for termo in componente:
+
+                termo_normalizado = normalizar(termo)
+
+                if termo_normalizado in conteudo:
+                    encontrou_componente = True
+                    termo_encontrado = termo
+                    break
+
+            if encontrou_componente:
+                componentes_encontrados.append(termo_encontrado)
+
+            else:
+                componentes_ausentes.append(" / ".join(componente))
+
+
+        total_componentes = len(item["componentes"])
+        total_encontrados = len(componentes_encontrados)
 
         print(f"\nObrigação: {item['obrigacao_pdf']}")
         print(f"Prazo: {item['prazo']}")
 
-        if termos_encontrados:
+        if total_encontrados == total_componentes:
 
-            encontrados += 1
+            completos += 1
 
-            print("✅ IDENTIFICADO NO PORTAL")
+            print("🟢 COMPLETO")
+
             print(
-                "Correspondência encontrada: "
-                + ", ".join(termos_encontrados)
+                "Componentes encontrados: "
+                + ", ".join(componentes_encontrados)
+            )
+
+        elif total_encontrados > 0:
+
+            parciais += 1
+
+            print("🟡 PARCIAL")
+
+            print(
+                "Encontrado: "
+                + ", ".join(componentes_encontrados)
+            )
+
+            print(
+                "Faltando: "
+                + ", ".join(componentes_ausentes)
             )
 
         else:
 
-            nao_encontrados += 1
+            ausentes += 1
 
-            print("❌ NÃO IDENTIFICADO")
+            print("🔴 NÃO IDENTIFICADO")
+
             print(
                 "Procuramos por: "
-                + ", ".join(item["procurar"])
+                + ", ".join(componentes_ausentes)
             )
 
 
     total = len(obrigacoes)
 
-    percentual = (encontrados / total) * 100
+    percentual_completo = (completos / total) * 100
+
+    percentual_estrutural = (
+        (completos + (parciais * 0.5)) / total
+    ) * 100
+
 
     print("\n")
-    print("=" * 70)
-    print("RESUMO DA VERIFICAÇÃO")
-    print("=" * 70)
+    print("=" * 72)
+    print("RESUMO DA AUDITORIA ESTRUTURAL")
+    print("=" * 72)
 
     print(f"Total de obrigações verificadas: {total}")
-    print(f"✅ Identificadas: {encontrados}")
-    print(f"❌ Não identificadas: {nao_encontrados}")
-    print(f"Conformidade estrutural inicial: {percentual:.1f}%")
+    print(f"🟢 Completas: {completos}")
+    print(f"🟡 Parciais: {parciais}")
+    print(f"🔴 Não identificadas: {ausentes}")
 
-    print("\nIMPORTANTE:")
     print(
-        "Esta etapa verifica apenas se a obrigação ou um nome equivalente "
-        "foi localizado no Portal."
+        f"Conformidade integral: "
+        f"{percentual_completo:.1f}%"
     )
+
     print(
-        "Ainda não confirma se os documentos estão atualizados "
-        "ou dentro do prazo."
+        f"Índice estrutural ponderado: "
+        f"{percentual_estrutural:.1f}%"
+    )
+
+    print("\nATENÇÃO:")
+    print(
+        "Este resultado verifica a presença estrutural dos componentes "
+        "exigidos pelo PDF."
+    )
+
+    print(
+        "Ainda não verifica a data da última publicação, "
+        "a atualização dos documentos ou o cumprimento dos prazos."
     )
 
 
