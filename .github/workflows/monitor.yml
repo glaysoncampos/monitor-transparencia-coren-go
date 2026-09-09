@@ -16,5 +16,8 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Instalar biblioteca requests
+        run: pip install requests
+
       - name: Executar monitor
         run: python monitor.py
