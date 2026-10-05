@@ -2,7 +2,7 @@ import requests
 import html
 import unicodedata
 
-URL = "https://coren-go.implanta.net.br/portaltransparencia/"
+URL = "https://coren-go.implanta.net.br/portaltransparencia/#publico/inicio"
 
 HEADERS = {
     "User-Agent": (
