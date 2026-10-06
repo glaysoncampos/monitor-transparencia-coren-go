@@ -1,539 +1,241 @@
-import requests
+import argparse
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 import html
+import json
+from pathlib import Path
+import re
 import unicodedata
+from urllib.parse import parse_qs, urlencode, urlsplit
+from urllib.request import Request, urlopen
+from zoneinfo import ZoneInfo
 
-URL = "https://coren-go.implanta.net.br/portaltransparencia/#publico/inicio"
-
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/152.0.0.0 Safari/537.36"
-    )
-}
+BASE = 'https://coren-go.implanta.net.br/portaltransparencia/'
+API = BASE + 'internal-api/'
+ROOT = Path(__file__).resolve().parent
 
 
 def normalizar(texto):
-    texto = html.unescape(texto)
-    texto = texto.upper()
-
-    texto = unicodedata.normalize("NFD", texto)
-
-    texto = "".join(
-        caractere
-        for caractere in texto
-        if unicodedata.category(caractere) != "Mn"
-    )
-
-    return " ".join(texto.split())
-
-
-obrigacoes = [
-
-    # ============================================================
-    # INSTITUCIONAL
-    # ============================================================
-
-    {
-        "menu": "INSTITUCIONAL",
-        "obrigacao_pdf": "Organograma",
-        "componentes": [
-            ["ORGANOGRAMA"]
-        ],
-        "prazo": "Quando houver atualização"
-    },
-
-    {
-        "menu": "INSTITUCIONAL",
-        "obrigacao_pdf": "Competências / Regimento Interno",
-        "componentes": [
-            ["COMPETENCIAS"],
-            ["REGIMENTO INTERNO", "REGIMENTO INTERNO COREN-GO"]
-        ],
-        "prazo": "Quando houver atualização"
-    },
-
-    {
-        "menu": "INSTITUCIONAL",
-        "obrigacao_pdf": "Endereço / Horário / Prazo para prestação de serviços",
-        "componentes": [
-            ["CONSELHO REGIONAL", "ENDERECO"],
-            ["HORARIO DE ATENDIMENTO"],
-            ["PRAZO PARA PRESTACAO DOS SERVICOS"]
-        ],
-        "prazo": "Quando houver atualização"
-    },
-
-    {
-        "menu": "INSTITUCIONAL",
-        "obrigacao_pdf": "Projetos, Programas e Ações",
-        "componentes": [
-            ["PROJETOS"],
-            ["PROGRAMAS"],
-            ["ACOES"]
-        ],
-        "prazo": "Anual"
-    },
-
-    {
-        "menu": "INSTITUCIONAL",
-        "obrigacao_pdf": "Plenário / Diretoria / Reuniões / Calendário / Atas / Agenda / Pareceres",
-        "componentes": [
-            ["PLENARIO"],
-            ["DIRETORIA"],
-            ["CALENDARIO DE REUNIOES", "REUNIOES"],
-            ["ATAS DO PLENARIO", "ATAS"],
-            ["AGENDA DA PRESIDENTE", "AGENDA"],
-            ["PARECERES"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    # ============================================================
-    # LEGISLAÇÃO
-    # ============================================================
-
-    {
-        "menu": "LEGISLAÇÃO",
-        "obrigacao_pdf": "Portarias / Resolução / Leis",
-        "componentes": [
-            ["PORTARIAS"],
-            ["RESOLUCOES", "RESOLUCAO"],
-            ["LEIS"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    # ============================================================
-    # FINANCEIRO
-    # ============================================================
-
-    {
-        "menu": "FINANCEIRO",
-        "obrigacao_pdf": "Demonstrações Contábeis",
-        "componentes": [
-            ["DEMONSTRACOES CONTABEIS", "BALANCETE"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    {
-        "menu": "FINANCEIRO",
-        "obrigacao_pdf": "Demonstração de Despesas e Receitas",
-        "componentes": [
-            ["COMPARATIVO DE RECEITA", "RECEITAS"],
-            ["COMPARATIVO DE DESPESAS", "DESPESAS"]
-        ],
-        "prazo": "Trimestral"
-    },
-
-    {
-        "menu": "FINANCEIRO",
-        "obrigacao_pdf": "Relação de Empenhos",
-        "componentes": [
-            ["RELACAO DE EMPENHOS", "EMPENHOS"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    {
-        "menu": "FINANCEIRO",
-        "obrigacao_pdf": "Centro de Custo",
-        "componentes": [
-            ["CENTRO DE CUSTO", "CENTRO DE CUSTOS"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    # ============================================================
-    # RELATÓRIOS
-    # ============================================================
-
-    {
-        "menu": "RELATÓRIOS",
-        "obrigacao_pdf": "Documentos Classificados e Desclassificados",
-        "componentes": [
-            ["DOCUMENTOS CLASSIFICADOS"],
-            ["DOCUMENTOS DESCLASSIFICADOS"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    {
-        "menu": "RELATÓRIOS",
-        "obrigacao_pdf": "Controle Externo",
-        "componentes": [
-            ["CONTROLE EXTERNO", "TCU"]
-        ],
-        "prazo": "Anual"
-    },
-
-    {
-        "menu": "RELATÓRIOS",
-        "obrigacao_pdf": "Controle Interno",
-        "componentes": [
-            ["CONTROLE INTERNO", "PLANO DE ATIVIDADES DA CONTROLADORIA"]
-        ],
-        "prazo": "Semestral"
-    },
-
-    # ============================================================
-    # LICITAÇÕES
-    # ============================================================
-
-    {
-        "menu": "LICITAÇÕES",
-        "obrigacao_pdf": "Licitações / Dispensas e Inexigibilidades",
-        "componentes": [
-            ["LICITACOES"],
-            ["DISPENSA"],
-            ["INEXIGIBILIDADE"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    {
-        "menu": "LICITAÇÕES",
-        "obrigacao_pdf": "Contratos",
-        "componentes": [
-            ["CONTRATOS"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    {
-        "menu": "LICITAÇÕES",
-        "obrigacao_pdf": "Convênios",
-        "componentes": [
-            ["CONVENIOS"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    {
-        "menu": "LICITAÇÕES",
-        "obrigacao_pdf": "Obras / Aquisições",
-        "componentes": [
-            ["OBRAS"],
-            ["AQUISICOES"]
-        ],
-        "prazo": "Quando houver"
-    },
-
-    # ============================================================
-    # VIAGENS
-    # ============================================================
-
-    {
-        "menu": "VIAGENS",
-        "obrigacao_pdf": "Passagens",
-        "componentes": [
-            ["PASSAGENS"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    {
-        "menu": "VIAGENS",
-        "obrigacao_pdf": "Diárias",
-        "componentes": [
-            ["DIARIAS"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    {
-        "menu": "VIAGENS",
-        "obrigacao_pdf": "Auxílio Representação",
-        "componentes": [
-            ["AUXILIO REPRESENTACAO"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    # ============================================================
-    # GESTÃO DE PESSOAS
-    # ============================================================
-
-    {
-        "menu": "GESTÃO DE PESSOAS",
-        "obrigacao_pdf": "Contatos dos empregados",
-        "componentes": [
-            ["CONTATOS", "CONTATO PROFISSIONAL"]
-        ],
-        "prazo": "Quando houver mudança"
-    },
-
-    {
-        "menu": "GESTÃO DE PESSOAS",
-        "obrigacao_pdf": "Plano de Cargos e Salários / Acordo Coletivo",
-        "componentes": [
-            ["PLANO DE CARGOS", "PLANO DE CARGOS E SALARIOS"],
-            ["ACORDO COLETIVO"]
-        ],
-        "prazo": "Quando houver atualização"
-    },
-
-    {
-        "menu": "GESTÃO DE PESSOAS",
-        "obrigacao_pdf": "Remuneração dos Empregados e Estagiários",
-        "componentes": [
-            ["REMUNERACAO DE EMPREGADOS", "REMUNERACAO DOS EMPREGADOS"],
-            ["ESTAGIARIOS"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    {
-        "menu": "GESTÃO DE PESSOAS",
-        "obrigacao_pdf": "Jetons",
-        "componentes": [
-            ["JETON", "JETONS"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    {
-        "menu": "GESTÃO DE PESSOAS",
-        "obrigacao_pdf": "Pessoal com cargos e currículo",
-        "componentes": [
-            ["RELACAO DOS EMPREGADOS COM CARGOS", "PESSOAL COM CARGOS"],
-            ["CURRICULO"]
-        ],
-        "prazo": "Quando houver alteração"
-    },
-
-    # ============================================================
-    # PRESTAÇÃO DE CONTAS
-    # ============================================================
-
-    {
-        "menu": "PRESTAÇÃO DE CONTAS",
-        "obrigacao_pdf": "Relatórios de Gestão",
-        "componentes": [
-            ["RELATORIO DE GESTAO", "RELATORIOS DE GESTAO"]
-        ],
-        "prazo": "Anual"
-    },
-
-    {
-        "menu": "PRESTAÇÃO DE CONTAS",
-        "obrigacao_pdf": "Boletim Informativo",
-        "componentes": [
-            ["BOLETIM INFORMATIVO"]
-        ],
-        "prazo": "Trimestral"
-    },
-
-    # ============================================================
-    # PEDIDOS DE INFORMAÇÃO
-    # ============================================================
-
-    {
-        "menu": "PEDIDOS DE INFORMAÇÃO",
-        "obrigacao_pdf": "e-SIC",
-        "componentes": [
-            ["E-SIC", "ESIC"]
-        ],
-        "prazo": "Quando houver alteração"
-    },
-
-    {
-        "menu": "PEDIDOS DE INFORMAÇÃO",
-        "obrigacao_pdf": "Cartilha da CGU",
-        "componentes": [
-            ["CARTILHA DA CGU", "CARTILHA DA CGU PARA ACESSO A INFORMACAO"]
-        ],
-        "prazo": "Sem prazo definido no anexo"
-    },
-
-    {
-        "menu": "PEDIDOS DE INFORMAÇÃO",
-        "obrigacao_pdf": "Relatório Ouvidoria",
-        "componentes": [
-            ["OUVIDORIA", "RELATORIO OUVIDORIA", "RELATORIO DA OUVIDORIA"]
-        ],
-        "prazo": "Mensal"
-    },
-
-    {
-        "menu": "PEDIDOS DE INFORMAÇÃO",
-        "obrigacao_pdf": "Perguntas Frequentes",
-        "componentes": [
-            ["PERGUNTAS FREQUENTES", "FAQ"]
-        ],
-        "prazo": "Anual"
-    },
-
-    # ============================================================
-    # DADOS ABERTOS
-    # ============================================================
-
-    {
-        "menu": "DADOS ABERTOS",
-        "obrigacao_pdf": "Catálogo de Dados Abertos / PDA",
-        "componentes": [
-            ["PDA", "PLANO DE DADOS ABERTOS"],
-            ["CATALOGO DE DADOS ABERTOS", "DADOS ABERTOS"]
-        ],
-        "prazo": "Quando houver atualização"
-    }
-]
-
-
-print("=" * 72)
-print("AUDITORIA ESTRUTURAL DO PORTAL DA TRANSPARÊNCIA DO COREN GOIÁS")
-print("=" * 72)
-
-try:
-
-    resposta = requests.get(
-        URL,
-        headers=HEADERS,
-        timeout=60
-    )
-
-    resposta.raise_for_status()
-
-    print("\n✅ Portal acessado com sucesso.")
-
-    conteudo = normalizar(resposta.text)
-
-    completos = 0
-    parciais = 0
-    ausentes = 0
-
-    menu_atual = None
-
-    for item in obrigacoes:
-
-        if menu_atual != item["menu"]:
-
-            menu_atual = item["menu"]
-
-            print("\n")
-            print("=" * 72)
-            print(menu_atual)
-            print("=" * 72)
-
-        componentes_encontrados = []
-        componentes_ausentes = []
-
-        for componente in item["componentes"]:
-
-            encontrou_componente = False
-            termo_encontrado = None
-
-            for termo in componente:
-
-                termo_normalizado = normalizar(termo)
-
-                if termo_normalizado in conteudo:
-                    encontrou_componente = True
-                    termo_encontrado = termo
-                    break
-
-            if encontrou_componente:
-                componentes_encontrados.append(termo_encontrado)
-
+    texto = re.sub(r'<[^>]+>', ' ', html.unescape(str(texto or '')))
+    texto = unicodedata.normalize('NFD', texto.upper())
+    return ' '.join(''.join(c for c in texto if unicodedata.category(c) != 'Mn').split())
+
+
+def anos(texto):
+    return set(re.findall(r'(?<!\d)(?:19|20)\d{2}(?!\d)', str(texto)))
+
+
+def corresponde(termos, texto):
+    texto = normalizar(texto)
+    return any(re.search(r'(?<!\w)' + re.escape(normalizar(t)) + r'(?!\w)', texto) for t in termos)
+
+
+def get_json(caminho):
+    req = Request(API + caminho, headers={'Accept': 'application/json', 'User-Agent': 'CorenGO-MonitorTransparencia/2.0'})
+    with urlopen(req, timeout=45) as resposta:
+        envelope = json.load(resposta)
+    if not isinstance(envelope, dict) or 'data' not in envelope or envelope.get('status', {}).get('success') is not True:
+        raise ValueError('Resposta inesperada da API pública; coleta não validada.')
+    return envelope['data']
+
+
+def percorrer_menu(itens, ano, caminho=()):
+    """Mantém pais navegáveis e filhos; elimina ramos exclusivos de outros anos."""
+    for item in itens:
+        label = str(item.get('label', '')).strip()
+        encontrados = anos(label)
+        # Intervalos, como PPA 2025-2027, também podem abranger o exercício.
+        intervalo = re.search(r'((?:19|20)\d{2})\s*[-–/]\s*((?:19|20)\d{2})', label)
+        vigente = intervalo and int(intervalo[1]) <= ano <= int(intervalo[2])
+        if encontrados and str(ano) not in encontrados and not vigente:
+            continue
+        atual = caminho + (label,)
+        url = item.get('url') or ''
+        if url and url != '#':
+            yield {'caminho': list(atual), 'url_original': url}
+        yield from percorrer_menu(item.get('children') or [], ano, atual)
+
+
+ROTAS = {
+    'publico/listas': ('listas-arquivos', 'idListaArquivo'),
+    'publico/conteudos': ('conteudos', 'idConteudo'),
+    'publico/linksexternos': ('links-externos', 'idLinkExterno'),
+}
+RELATORIOS = {
+    'publico/orcamentofinancas': 'orcamento-financas',
+    'publico/licitacoescontratos': 'licitacoes-contratos',
+    'publico/diversos': 'diversos',
+}
+
+
+def resolver_url(original):
+    fragmento = urlsplit(original).fragment
+    rota, _, query = fragmento.partition('?')
+    params = parse_qs(query)
+    tipo, campo = ROTAS.get(rota.lower(), (None, None))
+    identificador = params.get('id', [''])[0]
+    if tipo and re.fullmatch(r'[0-9a-fA-F-]{36}', identificador):
+        filtro = {campo: identificador}
+        if tipo == 'listas-arquivos':
+            filtro['list'] = 'true'
+        return tipo, BASE + tipo + '/' + identificador, tipo + '?' + urlencode(filtro)
+    if rota.lower() in RELATORIOS:
+        return 'relatorio', BASE + 'relatorios/' + RELATORIOS[rota.lower()] + ('?' + query if query else ''), None
+    if original.startswith(('https://', 'http://')):
+        return 'externo', original, None
+    return 'desconhecido', BASE + '#' + fragmento, None
+
+
+def coletar_fonte(fonte):
+    tipo, url, endpoint = resolver_url(fonte['url_original'])
+    resultado = dict(fonte, tipo=tipo, url=url, estado='ok', registros=[])
+    if not endpoint:
+        resultado.update(estado='manual', motivo='Relatório interativo ou destino externo: selecionar 2026 e conferir o conteúdo.')
+        return resultado
+    try:
+        dados = get_json(endpoint)
+        if tipo == 'listas-arquivos':
+            if not isinstance(dados, list):
+                raise ValueError('Formato da lista de arquivos alterado.')
+            for item in dados:
+                anexo = item.get('anexo') or {}
+                if not isinstance(item.get('nome'), str) or not isinstance(anexo, dict):
+                    raise ValueError('Registro de arquivo em formato inesperado.')
+                resultado['registros'].append({
+                    'titulo': item['nome'], 'descricao': item.get('descricao') or '',
+                    'arquivo': anexo.get('nome') or '', 'anexo_id': anexo.get('id') or '',
+                    'data_upload': item.get('dataUpload') or '',
+                })
+        elif tipo == 'conteudos':
+            if not isinstance(dados, dict) or 'texto' not in dados:
+                raise ValueError('Formato do conteúdo alterado.')
+            texto = normalizar(dados.get('texto'))
+            if texto and not corresponde(['EM CONSTRUCAO', 'EM ATUALIZACAO', 'EM BREVE'], texto):
+                resultado['registros'] = [{'titulo': dados.get('titulo') or '', 'descricao': texto, 'arquivo': '', 'data_upload': ''}]
             else:
-                componentes_ausentes.append(" / ".join(componente))
-
-
-        total_componentes = len(item["componentes"])
-        total_encontrados = len(componentes_encontrados)
-
-        print(f"\nObrigação: {item['obrigacao_pdf']}")
-        print(f"Prazo: {item['prazo']}")
-
-        if total_encontrados == total_componentes:
-
-            completos += 1
-
-            print("🟢 COMPLETO")
-
-            print(
-                "Componentes encontrados: "
-                + ", ".join(componentes_encontrados)
-            )
-
-        elif total_encontrados > 0:
-
-            parciais += 1
-
-            print("🟡 PARCIAL")
-
-            print(
-                "Encontrado: "
-                + ", ".join(componentes_encontrados)
-            )
-
-            print(
-                "Faltando: "
-                + ", ".join(componentes_ausentes)
-            )
-
+                resultado['motivo'] = 'Conteúdo vazio ou em construção.'
         else:
-
-            ausentes += 1
-
-            print("🔴 NÃO IDENTIFICADO")
-
-            print(
-                "Procuramos por: "
-                + ", ".join(componentes_ausentes)
-            )
+            if not isinstance(dados, dict) or 'linkExterno' not in dados:
+                raise ValueError('Formato do link externo alterado.')
+            destino = dados.get('linkExterno') or ''
+            resultado.update(estado='manual', motivo='Link cadastrado; conteúdo e exercício do destino requerem verificação.', destino=destino)
+    except Exception as erro:
+        resultado.update(estado='erro', motivo=f'{type(erro).__name__}: {erro}')
+    return resultado
 
 
-    total = len(obrigacoes)
-
-    percentual_completo = (completos / total) * 100
-
-    percentual_estrutural = (
-        (completos + (parciais * 0.5)) / total
-    ) * 100
-
-
-    print("\n")
-    print("=" * 72)
-    print("RESUMO DA AUDITORIA ESTRUTURAL")
-    print("=" * 72)
-
-    print(f"Total de obrigações verificadas: {total}")
-    print(f"🟢 Completas: {completos}")
-    print(f"🟡 Parciais: {parciais}")
-    print(f"🔴 Não identificadas: {ausentes}")
-
-    print(
-        f"Conformidade integral: "
-        f"{percentual_completo:.1f}%"
-    )
-
-    print(
-        f"Índice estrutural ponderado: "
-        f"{percentual_estrutural:.1f}%"
-    )
-
-    print("\nATENÇÃO:")
-    print(
-        "Este resultado verifica a presença estrutural dos componentes "
-        "exigidos pelo PDF."
-    )
-
-    print(
-        "Ainda não verifica a data da última publicação, "
-        "a atualização dos documentos ou o cumprimento dos prazos."
-    )
+# Informações permanentes não precisam conter o ano no título.
+# Sua vigência material ainda depende de revisão humana.
+PERMANENTES = {
+    'Organograma', 'Competências / Regimento Interno',
+    'Endereço / Horário / Prazo para prestação de serviços',
+    'Contatos dos empregados', 'Plano de Cargos e Salários / Acordo Coletivo',
+    'e-SIC', 'Cartilha da CGU', 'Perguntas Frequentes', 'Catálogo de Dados Abertos / PDA',
+}
 
 
-except requests.exceptions.Timeout:
-
-    print(
-        "❌ O Portal demorou mais de 60 segundos para responder."
-    )
+def permanente(item, termos):
+    return item['obrigacao_pdf'] in PERMANENTES or termos in [['PLENARIO'], ['DIRETORIA'], ['LEIS'], ['RESOLUCOES', 'RESOLUCAO']]
 
 
-except requests.exceptions.RequestException as erro:
+def evidencias(fonte, ano, fixo=False):
+    aceitos, incertos = [], []
+    ano_ramo = str(ano) in anos(' / '.join(fonte['caminho']))
+    for registro in fonte['registros']:
+        if fonte['tipo'] == 'listas-arquivos' and not registro.get('anexo_id'):
+            incertos.append(registro)
+            continue
+        # Data de upload NÃO determina o exercício do documento.
+        texto = ' '.join(registro.get(k, '') for k in ('titulo', 'descricao', 'arquivo'))
+        referencia = anos(texto)
+        if fixo or str(ano) in referencia or (ano_ramo and not referencia):
+            aceitos.append(registro)
+        elif not referencia:
+            incertos.append(registro)
+    return aceitos, incertos
 
-    print("❌ Erro ao acessar o Portal da Transparência.")
-    print(erro)
+
+def avaliar(item, fontes, ano):
+    componentes = []
+    menus = {normalizar(item['menu'])}
+    if item['obrigacao_pdf'] == 'Auxílio Representação':
+        menus.add('GESTAO DE PESSOAS')
+    if item['obrigacao_pdf'] == 'Relatório Ouvidoria':
+        menus.add('RELATORIOS')
+    for termos in item['componentes']:
+        candidatos = [f for f in fontes if normalizar(f['caminho'][0]) in menus and corresponde(termos, ' / '.join(f['caminho'][1:]))]
+        provas, pendencias, erros = [], [], []
+        for f in candidatos:
+            base = {'caminho': ' > '.join(f['caminho']), 'url': f['url']}
+            if f['estado'] != 'ok':
+                (erros if f['estado'] == 'erro' else pendencias).append(dict(base, motivo=f['motivo']))
+                continue
+            aceitos, incertos = evidencias(f, ano, permanente(item, termos))
+            if aceitos:
+                provas.append(dict(base, registros=aceitos, permanente=permanente(item, termos)))
+            if incertos:
+                pendencias.append(dict(base, motivo='Há registros sem exercício identificável ou sem anexo confirmado.'))
+        if provas:
+            status = 'localizado'
+        elif erros:
+            status = 'erro'
+        elif pendencias:
+            status = 'manual'
+        else:
+            status = 'nao_identificado'
+        componentes.append({'termos': termos, 'status': status, 'evidencias': provas, 'pendencias': pendencias, 'erros': erros,
+                            'fontes_consultadas': [f['url'] for f in candidatos]})
+    estados = [c['status'] for c in componentes]
+    if all(e == 'localizado' for e in estados):
+        status = 'localizado'
+    elif 'localizado' in estados:
+        status = 'parcial'
+    elif 'erro' in estados:
+        status = 'erro'
+    elif 'manual' in estados:
+        status = 'manual'
+    else:
+        status = 'nao_identificado'
+    return dict(item, status=status, componentes=componentes)
+
+
+def executar(ano=2026):
+    itens = get_json('menu')
+    if not isinstance(itens, list) or len(itens) < 5 or not any(normalizar(x.get('label')) == 'INSTITUCIONAL' for x in itens):
+        raise ValueError('Menu incompleto ou em formato inesperado. Resultado anterior preservado.')
+    fontes = list(percorrer_menu(itens, ano))
+    if len(fontes) < 20:
+        raise ValueError('Menu sem seções suficientes. Resultado anterior preservado.')
+    # Consulta cada URL uma vez, preservando todos os caminhos em que ela aparece.
+    unicos = {f['url_original']: f for f in fontes}
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        dados = dict(zip(unicos, pool.map(coletar_fonte, unicos.values())))
+    coletadas = [dict(dados[f['url_original']], caminho=f['caminho']) for f in fontes]
+    acessiveis = [f for f in coletadas if f['tipo'] in ('listas-arquivos', 'conteudos', 'links-externos')]
+    if not any(f['estado'] != 'erro' for f in acessiveis):
+        raise ValueError('Todas as consultas falharam. Resultado anterior preservado.')
+    obrigacoes = json.loads((ROOT / 'obrigacoes.json').read_text(encoding='utf-8'))
+    return {
+        'ano': ano, 'verificado_em': datetime.now(ZoneInfo('America/Sao_Paulo')).isoformat(),
+        'portal': BASE + '#publico/inicio', 'fontes': coletadas,
+        'resultados': [avaliar(item, coletadas, ano) for item in obrigacoes],
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--ano', type=int, default=2026)
+    parser.add_argument('--saida', default='resultado.json')
+    args = parser.parse_args()
+    if not 2000 <= args.ano <= 2100:
+        parser.error('Exercício inválido.')
+    resultado = executar(args.ano)
+    destino = Path(args.saida)
+    temporario = destino.with_suffix('.tmp')
+    temporario.write_text(json.dumps(resultado, ensure_ascii=False, indent=2), encoding='utf-8')
+    temporario.replace(destino)
+    print(f'Exercício {args.ano}: {len(resultado["fontes"])} seções consultadas.')
+
+
+if __name__ == '__main__':
+    main()
