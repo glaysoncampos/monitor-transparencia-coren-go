@@ -2,6 +2,12 @@ name: Monitor Portal da Transparencia
 
 on:
   workflow_dispatch:
+    inputs:
+      ano:
+        description: 'Exercício da análise'
+        required: true
+        default: '2026'
+        type: string
   schedule:
     - cron: '0 11 * * *'
 
@@ -11,6 +17,7 @@ permissions:
 jobs:
   executar-monitor:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Baixar arquivos do repositorio
@@ -21,11 +28,13 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Instalar biblioteca requests
-        run: pip install requests
+      - name: Validar regras da coleta
+        run: python -m unittest discover -s tests -v
 
       - name: Gerar dashboard atualizado
-        run: python gerar_dashboard.py
+        env:
+          ANO_REFERENCIA: ${{ inputs.ano || '2026' }}
+        run: python gerar_dashboard.py --ano "$ANO_REFERENCIA"
 
       - name: Salvar dashboard no repositorio
         run: |
