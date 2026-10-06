@@ -1,3 +1,4 @@
+"""Monitor de evidências públicas do portal Implanta, com recorte por exercício."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
