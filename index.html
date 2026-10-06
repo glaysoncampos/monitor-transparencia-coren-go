@@ -1,651 +1,88 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+"""Gera painel somente após uma coleta válida; não interpreta stdout."""
+import argparse
+from collections import Counter
+from datetime import datetime
+from html import escape
+import json
+from pathlib import Path
+from monitor import executar
 
-<head>
+STATUS = {
+    'localizado': ('Evidência localizada', 'verde'),
+    'parcial': ('Parcial', 'amarelo'),
+    'nao_identificado': ('Não identificado na coleta', 'vermelho'),
+    'manual': ('Verificação manual', 'azul'),
+    'erro': ('Falha de coleta', 'cinza'),
+}
 
-<meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+def link(url, texto):
+    if not url.startswith(('https://', 'http://')):
+        return escape(texto)
+    return f'<a href="{escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">{escape(texto)}</a>'
 
-<title>
-Monitor do Portal da Transparência | Coren-GO
-</title>
 
+def renderizar(dados):
+    contagem = Counter(r['status'] for r in dados['resultados'])
+    total = len(dados['resultados'])
+    linhas = []
+    for item in dados['resultados']:
+        detalhes = []
+        for componente in item['componentes']:
+            rotulo, cor = STATUS[componente['status']]
+            trecho = f'<p><strong>{escape(" / ".join(componente["termos"]))}</strong>: <span class="{cor}">{rotulo}</span></p>'
+            for prova in componente['evidencias']:
+                trecho += '<p>' + link(prova['url'], prova['caminho']) + '</p><ul>'
+                for registro in prova['registros']:
+                    data = ('; upload: ' + registro['data_upload']) if registro.get('data_upload') else ''
+                    trecho += '<li>' + escape(registro['titulo'] + data) + '</li>'
+                trecho += '</ul>'
+                if prova['permanente']:
+                    trecho += '<p class="nota">Informação permanente localizada. Vigência material não validada.</p>'
+            for pendencia in componente['pendencias'] + componente['erros']:
+                trecho += '<p>' + link(pendencia['url'], pendencia['caminho']) + ': ' + escape(pendencia['motivo']) + '</p>'
+            if componente['status'] == 'nao_identificado':
+                trecho += '<p>Não foi localizada evidência correspondente no recorte da coleta. Isso não comprova descumprimento.</p>'
+                for url in componente['fontes_consultadas']:
+                    trecho += '<p>' + link(url, 'Conferir seção consultada') + '</p>'
+            detalhes.append(trecho)
+        label, cor = STATUS[item['status']]
+        linhas.append(f'<tr><td class="{cor}">{label}</td><td><strong>{escape(item["obrigacao_pdf"])}</strong><p class="nota">{escape(item["menu"])}</p></td><td><details><summary>Ver componentes e evidências</summary>{"".join(detalhes)}</details></td></tr>')
+    cards = f'<div class="card"><span>Obrigações</span><b>{total}</b></div>'
+    for chave, (label, cor) in STATUS.items():
+        cards += f'<div class="card"><span>{label}</span><b class="{cor}">{contagem[chave]}</b></div>'
+    cobertura = f'{100 * contagem["localizado"] / total:.1f}'.replace('.', ',') if total else '0'
+    data = datetime.fromisoformat(dados['verificado_em']).strftime('%d/%m/%Y às %H:%M')
+    erros = sum(f['estado'] == 'erro' for f in dados['fontes'])
+    aviso_erro = f'<p class="vermelho">Coleta incompleta: {erros} seções apresentaram falha. Consulte os detalhes antes de usar os resultados.</p>' if erros else ''
+    fontes = ''.join('<li>' + link(f['url'], ' > '.join(f['caminho'])) + ': ' + escape({'ok':'consulta realizada', 'manual':'verificação manual necessária', 'erro':'falha de coleta'}[f['estado']]) + '</li>' for f in dados['fontes'])
+    return f'''<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitor da Transparência {dados['ano']} | Coren-GO</title>
 <style>
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f4f7fb;
-    color: #172033;
-}
-
-header {
-    background: #245b9e;
-    color: white;
-    padding: 32px 20px;
-}
-
-.container {
-    width: min(1100px, calc(100% - 32px));
-    margin: auto;
-}
-
-h1 {
-    margin: 0 0 8px;
-}
-
-main {
-    padding: 28px 0;
-}
-
-.aviso {
-    background: #eef5ff;
-    border: 1px solid #cfe1f7;
-    padding: 16px;
-    border-radius: 12px;
-    margin-bottom: 24px;
-}
-
-.atualizacao {
-    margin-top: 8px;
-    color: #475467;
-}
-
-.cards {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-}
-
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 14px;
-    border: 1px solid #e4e7ec;
-}
-
-.titulo {
-    font-size: 13px;
-    color: #667085;
-    text-transform: uppercase;
-}
-
-.numero {
-    margin-top: 8px;
-    font-size: 34px;
-    font-weight: bold;
-}
-
-.verde {
-    color: #1f9d63;
-}
-
-.amarelo {
-    color: #d9a514;
-}
-
-.vermelho {
-    color: #d64545;
-}
-
-.azul {
-    color: #245b9e;
-}
-
-.conformidade {
-    margin-top: 22px;
-    background: white;
-    padding: 22px;
-    border-radius: 14px;
-    border: 1px solid #e4e7ec;
-}
-
-table {
-    width: 100%;
-    margin-top: 24px;
-    border-collapse: collapse;
-    background: white;
-}
-
-th, td {
-    padding: 14px;
-    border-bottom: 1px solid #e4e7ec;
-    text-align: left;
-}
-
-th {
-    background: #f8fafc;
-}
-
-footer {
-    margin-top: 30px;
-    text-align: center;
-    color: #667085;
-    padding: 20px;
-}
-
-@media (max-width: 800px) {
-
-    .cards {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-}
-
-@media (max-width: 500px) {
-
-    .cards {
-        grid-template-columns: 1fr;
-    }
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-<header>
-
-<div class="container">
-
-<h1>
-Monitor do Portal da Transparência
-</h1>
-
-<p>
-Coren-GO | Verificação estrutural das obrigações de transparência
-</p>
-
-</div>
-
-</header>
-
-
-<main class="container">
-
-<div class="aviso">
-
-<strong>Escopo atual:</strong>
-
-esta análise verifica automaticamente
-se os itens exigidos foram identificados
-no Portal da Transparência.
-
-<div class="atualizacao">
-
-<strong>Última verificação automática:</strong>
-06/10/2026 às 14:07
-
-</div>
-
-</div>
-
-
-<div class="cards">
-
-<div class="card">
-
-<div class="titulo">
-Obrigações verificadas
-</div>
-
-<div class="numero azul">
-32
-</div>
-
-</div>
-
-
-<div class="card">
-
-<div class="titulo">
-Completas
-</div>
-
-<div class="numero verde">
-3
-</div>
-
-</div>
-
-
-<div class="card">
-
-<div class="titulo">
-Parciais
-</div>
-
-<div class="numero amarelo">
-0
-</div>
-
-</div>
-
-
-<div class="card">
-
-<div class="titulo">
-Não identificadas
-</div>
-
-<div class="numero vermelho">
-29
-</div>
-
-</div>
-
-</div>
-
-
-<div class="conformidade">
-
-<div class="titulo">
-Conformidade integral
-</div>
-
-<div class="numero verde">
-9.4%
-</div>
-
-<p>
-Índice estrutural ponderado:
-<strong>9.4%</strong>
-</p>
-
-</div>
-
-
-<h2>
-Pontos para verificação
-</h2>
-
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Situação</th>
-<th>Obrigação</th>
-<th>Resultado</th>
-
-</tr>
-
-</thead>
-
-
-<tbody>
-
-
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Organograma
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: ORGANOGRAMA
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Competências / Regimento Interno
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: COMPETENCIAS, REGIMENTO INTERNO / REGIMENTO INTERNO COREN-GO
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Endereço / Horário / Prazo para prestação de serviços
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: CONSELHO REGIONAL / ENDERECO, HORARIO DE ATENDIMENTO, PRAZO PARA PRESTACAO DOS SERVICOS
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Projetos, Programas e Ações
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: PROJETOS, PROGRAMAS, ACOES
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Plenário / Diretoria / Reuniões / Calendário / Atas / Agenda / Pareceres
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: PLENARIO, DIRETORIA, CALENDARIO DE REUNIOES / REUNIOES, ATAS DO PLENARIO / ATAS, AGENDA DA PRESIDENTE / AGENDA, PARECERES
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Portarias / Resolução / Leis
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: PORTARIAS, RESOLUCOES / RESOLUCAO, LEIS
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Demonstrações Contábeis
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: DEMONSTRACOES CONTABEIS / BALANCETE
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Demonstração de Despesas e Receitas
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: COMPARATIVO DE RECEITA / RECEITAS, COMPARATIVO DE DESPESAS / DESPESAS
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Relação de Empenhos
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: RELACAO DE EMPENHOS / EMPENHOS
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Centro de Custo
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: CENTRO DE CUSTO / CENTRO DE CUSTOS
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Documentos Classificados e Desclassificados
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: DOCUMENTOS CLASSIFICADOS, DOCUMENTOS DESCLASSIFICADOS
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Controle Externo
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: CONTROLE EXTERNO / TCU
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Controle Interno
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: CONTROLE INTERNO / PLANO DE ATIVIDADES DA CONTROLADORIA
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Licitações / Dispensas e Inexigibilidades
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: LICITACOES, DISPENSA, INEXIGIBILIDADE
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Convênios
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: CONVENIOS
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Obras / Aquisições
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: OBRAS, AQUISICOES
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Passagens
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: PASSAGENS
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Diárias
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: DIARIAS
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Auxílio Representação
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: AUXILIO REPRESENTACAO
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Contatos dos empregados
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: CONTATOS / CONTATO PROFISSIONAL
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Plano de Cargos e Salários / Acordo Coletivo
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: PLANO DE CARGOS / PLANO DE CARGOS E SALARIOS, ACORDO COLETIVO
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Remuneração dos Empregados e Estagiários
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: REMUNERACAO DE EMPREGADOS / REMUNERACAO DOS EMPREGADOS, ESTAGIARIOS
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Jetons
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: JETON / JETONS
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Pessoal com cargos e currículo
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: RELACAO DOS EMPREGADOS COM CARGOS / PESSOAL COM CARGOS, CURRICULO
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Relatórios de Gestão
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: RELATORIO DE GESTAO / RELATORIOS DE GESTAO
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Boletim Informativo
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: BOLETIM INFORMATIVO
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Cartilha da CGU
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: CARTILHA DA CGU / CARTILHA DA CGU PARA ACESSO A INFORMACAO
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Perguntas Frequentes
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: PERGUNTAS FREQUENTES / FAQ
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="vermelho">
-            🔴 Não identificado
-        </td>
-        <td>
-            Catálogo de Dados Abertos / PDA
-        </td>
-        <td>
-            Nenhuma correspondência localizada. Termos pesquisados: PDA / PLANO DE DADOS ABERTOS, CATALOGO DE DADOS ABERTOS / DADOS ABERTOS
-        </td>
-    </tr>
-    
-
-</tbody>
-
-</table>
-
-
-<footer>
-
-Painel atualizado automaticamente
-pelo GitHub Actions
-
-</footer>
-
-
-</main>
-
-</body>
-
-</html>
+*{{box-sizing:border-box}}body{{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033;line-height:1.5}}header{{background:#245b9e;color:white;padding:28px 0}}.container{{width:min(1200px,calc(100% - 32px));margin:auto}}h1{{margin:0;font-size:clamp(24px,4vw,36px)}}main{{padding:24px 0}}.aviso,.card,.indice{{padding:20px;border:1px solid #dce5ef;border-radius:14px;background:white}}.aviso{{background:#eef5ff;margin-bottom:20px}}.cards{{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}}.card span{{font-size:13px;color:#55657a;text-transform:uppercase}}.card b{{display:block;font-size:32px}}.verde{{color:#147044}}.amarelo{{color:#8a6200}}.vermelho{{color:#b92335}}.azul{{color:#245b9e}}.cinza,.nota{{color:#596577}}.nota{{font-size:13px}}.indice{{margin-top:20px}}.indice b{{font-size:30px;color:#245b9e}}.tabela{{overflow-x:auto}}table{{width:100%;border-collapse:collapse;background:white;margin:20px 0}}th,td{{text-align:left;padding:16px;border-bottom:1px solid #e4e7ec;vertical-align:top}}th{{background:#edf2f8}}td:first-child{{min-width:135px}}td:nth-child(2){{min-width:230px}}td:nth-child(3){{width:52%;min-width:250px}}a{{color:#145ca4;overflow-wrap:anywhere}}summary{{cursor:pointer;color:#145ca4;font-weight:bold}}details p{{margin:10px 0}}li{{margin-bottom:6px}}footer{{padding:20px 0;color:#596577}}@media(max-width:600px){{.cards{{grid-template-columns:repeat(2,1fr)}}.card{{padding:14px}}}}@media print{{header{{background:white;color:black}}details> *{{display:block!important}}.tabela{{overflow:visible}}}}
+</style></head><body><header><div class="container"><h1>Monitor do Portal da Transparência</h1><p>Coren-GO | Exercício {dados['ano']}</p></div></header>
+<main class="container"><div class="aviso"><strong>Escopo da verificação</strong><p>Consulta dos menus e do conteúdo das seções do portal. Documentos periódicos são selecionados pelo exercício {dados['ano']}, identificado no título, na descrição ou no ramo do menu. A data de upload não substitui o exercício.</p><p>Informações permanentes são apresentadas separadamente nos detalhes. PDFs não são auditados internamente. Links externos e relatórios interativos sem validação são encaminhados para verificação manual.</p><p>Última coleta: <strong>{data} (Brasília)</strong>. {link(dados['portal'], 'Abrir portal oficial')}</p>{aviso_erro}</div>
+<div class="cards">{cards}</div><div class="indice"><span>Cobertura de evidências de todos os componentes</span><br><b>{cobertura}%</b><p>{contagem['localizado']} de {total} obrigações com evidência localizada para todos os componentes. Este indicador não certifica conformidade jurídica, conteúdo dos anexos ou cumprimento de prazos.</p></div>
+<h2>Obrigações e evidências</h2><div class="tabela"><table><thead><tr><th>Situação</th><th>Obrigação</th><th>Resultado da coleta</th></tr></thead><tbody>{''.join(linhas)}</tbody></table></div>
+<details><summary>Seções consultadas ({len(dados['fontes'])})</summary><ul>{fontes}</ul></details>
+<footer>Matriz de 32 obrigações preservada do projeto original. Prazos e base normativa exigem validação da Controladoria. Atualização automática pelo GitHub Actions.</footer></main></body></html>'''
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--ano', type=int, default=2026)
+    parser.add_argument('--dados', help='JSON de uma coleta existente; não consulta a internet.')
+    args = parser.parse_args()
+    if not 2000 <= args.ano <= 2100:
+        parser.error('Exercício inválido.')
+    dados = json.loads(Path(args.dados).read_text(encoding='utf-8')) if args.dados else executar(args.ano)
+    pagina = renderizar(dados)
+    # Nada é sobrescrito se a coleta ou a renderização falhar.
+    Path('index.html.tmp').write_text(pagina, encoding='utf-8')
+    Path('index.html.tmp').replace('index.html')
+    print(f'Painel atualizado: exercício {dados["ano"]}, {len(dados["resultados"])} obrigações.')
+
+
+if __name__ == '__main__':
+    main()
