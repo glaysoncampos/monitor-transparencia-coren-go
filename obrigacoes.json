@@ -1,0 +1,411 @@
+[
+  {
+    "menu": "INSTITUCIONAL",
+    "obrigacao_pdf": "Organograma",
+    "componentes": [
+      [
+        "ORGANOGRAMA"
+      ]
+    ],
+    "prazo": "Quando houver atualização"
+  },
+  {
+    "menu": "INSTITUCIONAL",
+    "obrigacao_pdf": "Competências / Regimento Interno",
+    "componentes": [
+      [
+        "COMPETENCIAS"
+      ],
+      [
+        "REGIMENTO INTERNO",
+        "REGIMENTO INTERNO COREN-GO"
+      ]
+    ],
+    "prazo": "Quando houver atualização"
+  },
+  {
+    "menu": "INSTITUCIONAL",
+    "obrigacao_pdf": "Endereço / Horário / Prazo para prestação de serviços",
+    "componentes": [
+      [
+        "CONSELHO REGIONAL",
+        "ENDERECO"
+      ],
+      [
+        "HORARIO DE ATENDIMENTO"
+      ],
+      [
+        "PRAZO PARA PRESTACAO DOS SERVICOS"
+      ]
+    ],
+    "prazo": "Quando houver atualização"
+  },
+  {
+    "menu": "INSTITUCIONAL",
+    "obrigacao_pdf": "Projetos, Programas e Ações",
+    "componentes": [
+      [
+        "PROJETOS"
+      ],
+      [
+        "PROGRAMAS"
+      ],
+      [
+        "ACOES"
+      ]
+    ],
+    "prazo": "Anual"
+  },
+  {
+    "menu": "INSTITUCIONAL",
+    "obrigacao_pdf": "Plenário / Diretoria / Reuniões / Calendário / Atas / Agenda / Pareceres",
+    "componentes": [
+      [
+        "PLENARIO"
+      ],
+      [
+        "DIRETORIA"
+      ],
+      [
+        "CALENDARIO DE REUNIOES",
+        "REUNIOES"
+      ],
+      [
+        "ATAS DO PLENARIO",
+        "ATAS"
+      ],
+      [
+        "AGENDA DA PRESIDENTE",
+        "AGENDA"
+      ],
+      [
+        "PARECERES"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "LEGISLAÇÃO",
+    "obrigacao_pdf": "Portarias / Resolução / Leis",
+    "componentes": [
+      [
+        "PORTARIAS"
+      ],
+      [
+        "RESOLUCOES",
+        "RESOLUCAO"
+      ],
+      [
+        "LEIS"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "FINANCEIRO",
+    "obrigacao_pdf": "Demonstrações Contábeis",
+    "componentes": [
+      [
+        "DEMONSTRACOES CONTABEIS",
+        "BALANCETE"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "FINANCEIRO",
+    "obrigacao_pdf": "Demonstração de Despesas e Receitas",
+    "componentes": [
+      [
+        "COMPARATIVO DE RECEITA",
+        "RECEITAS"
+      ],
+      [
+        "COMPARATIVO DE DESPESAS",
+        "DESPESAS"
+      ]
+    ],
+    "prazo": "Trimestral"
+  },
+  {
+    "menu": "FINANCEIRO",
+    "obrigacao_pdf": "Relação de Empenhos",
+    "componentes": [
+      [
+        "RELACAO DE EMPENHOS",
+        "EMPENHOS"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "FINANCEIRO",
+    "obrigacao_pdf": "Centro de Custo",
+    "componentes": [
+      [
+        "CENTRO DE CUSTO",
+        "CENTRO DE CUSTOS"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "RELATÓRIOS",
+    "obrigacao_pdf": "Documentos Classificados e Desclassificados",
+    "componentes": [
+      [
+        "DOCUMENTOS CLASSIFICADOS"
+      ],
+      [
+        "DOCUMENTOS DESCLASSIFICADOS"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "RELATÓRIOS",
+    "obrigacao_pdf": "Controle Externo",
+    "componentes": [
+      [
+        "CONTROLE EXTERNO",
+        "TCU"
+      ]
+    ],
+    "prazo": "Anual"
+  },
+  {
+    "menu": "RELATÓRIOS",
+    "obrigacao_pdf": "Controle Interno",
+    "componentes": [
+      [
+        "CONTROLE INTERNO",
+        "PLANO DE ATIVIDADES DA CONTROLADORIA"
+      ]
+    ],
+    "prazo": "Semestral"
+  },
+  {
+    "menu": "LICITAÇÕES",
+    "obrigacao_pdf": "Licitações / Dispensas e Inexigibilidades",
+    "componentes": [
+      [
+        "LICITACOES"
+      ],
+      [
+        "DISPENSA"
+      ],
+      [
+        "INEXIGIBILIDADE"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "LICITAÇÕES",
+    "obrigacao_pdf": "Contratos",
+    "componentes": [
+      [
+        "CONTRATOS"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "LICITAÇÕES",
+    "obrigacao_pdf": "Convênios",
+    "componentes": [
+      [
+        "CONVENIOS"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "LICITAÇÕES",
+    "obrigacao_pdf": "Obras / Aquisições",
+    "componentes": [
+      [
+        "OBRAS"
+      ],
+      [
+        "AQUISICOES"
+      ]
+    ],
+    "prazo": "Quando houver"
+  },
+  {
+    "menu": "VIAGENS",
+    "obrigacao_pdf": "Passagens",
+    "componentes": [
+      [
+        "PASSAGENS"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "VIAGENS",
+    "obrigacao_pdf": "Diárias",
+    "componentes": [
+      [
+        "DIARIAS"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "VIAGENS",
+    "obrigacao_pdf": "Auxílio Representação",
+    "componentes": [
+      [
+        "AUXILIO REPRESENTACAO"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "GESTÃO DE PESSOAS",
+    "obrigacao_pdf": "Contatos dos empregados",
+    "componentes": [
+      [
+        "CONTATOS",
+        "CONTATO PROFISSIONAL"
+      ]
+    ],
+    "prazo": "Quando houver mudança"
+  },
+  {
+    "menu": "GESTÃO DE PESSOAS",
+    "obrigacao_pdf": "Plano de Cargos e Salários / Acordo Coletivo",
+    "componentes": [
+      [
+        "PLANO DE CARGOS",
+        "PLANO DE CARGOS E SALARIOS"
+      ],
+      [
+        "ACORDO COLETIVO"
+      ]
+    ],
+    "prazo": "Quando houver atualização"
+  },
+  {
+    "menu": "GESTÃO DE PESSOAS",
+    "obrigacao_pdf": "Remuneração dos Empregados e Estagiários",
+    "componentes": [
+      [
+        "REMUNERACAO DE EMPREGADOS",
+        "REMUNERACAO DOS EMPREGADOS"
+      ],
+      [
+        "ESTAGIARIOS"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "GESTÃO DE PESSOAS",
+    "obrigacao_pdf": "Jetons",
+    "componentes": [
+      [
+        "JETON",
+        "JETONS"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "GESTÃO DE PESSOAS",
+    "obrigacao_pdf": "Pessoal com cargos e currículo",
+    "componentes": [
+      [
+        "RELACAO DOS EMPREGADOS COM CARGOS",
+        "PESSOAL COM CARGOS"
+      ],
+      [
+        "CURRICULO"
+      ]
+    ],
+    "prazo": "Quando houver alteração"
+  },
+  {
+    "menu": "PRESTAÇÃO DE CONTAS",
+    "obrigacao_pdf": "Relatórios de Gestão",
+    "componentes": [
+      [
+        "RELATORIO DE GESTAO",
+        "RELATORIOS DE GESTAO"
+      ]
+    ],
+    "prazo": "Anual"
+  },
+  {
+    "menu": "PRESTAÇÃO DE CONTAS",
+    "obrigacao_pdf": "Boletim Informativo",
+    "componentes": [
+      [
+        "BOLETIM INFORMATIVO"
+      ]
+    ],
+    "prazo": "Trimestral"
+  },
+  {
+    "menu": "PEDIDOS DE INFORMAÇÃO",
+    "obrigacao_pdf": "e-SIC",
+    "componentes": [
+      [
+        "E-SIC",
+        "ESIC"
+      ]
+    ],
+    "prazo": "Quando houver alteração"
+  },
+  {
+    "menu": "PEDIDOS DE INFORMAÇÃO",
+    "obrigacao_pdf": "Cartilha da CGU",
+    "componentes": [
+      [
+        "CARTILHA DA CGU",
+        "CARTILHA DA CGU PARA ACESSO A INFORMACAO"
+      ]
+    ],
+    "prazo": "Sem prazo definido no anexo"
+  },
+  {
+    "menu": "PEDIDOS DE INFORMAÇÃO",
+    "obrigacao_pdf": "Relatório Ouvidoria",
+    "componentes": [
+      [
+        "OUVIDORIA",
+        "RELATORIO OUVIDORIA",
+        "RELATORIO DA OUVIDORIA"
+      ]
+    ],
+    "prazo": "Mensal"
+  },
+  {
+    "menu": "PEDIDOS DE INFORMAÇÃO",
+    "obrigacao_pdf": "Perguntas Frequentes",
+    "componentes": [
+      [
+        "PERGUNTAS FREQUENTES",
+        "FAQ"
+      ]
+    ],
+    "prazo": "Anual"
+  },
+  {
+    "menu": "DADOS ABERTOS",
+    "obrigacao_pdf": "Catálogo de Dados Abertos / PDA",
+    "componentes": [
+      [
+        "PDA",
+        "PLANO DE DADOS ABERTOS"
+      ],
+      [
+        "CATALOGO DE DADOS ABERTOS",
+        "DADOS ABERTOS"
+      ]
+    ],
+    "prazo": "Quando houver atualização"
+  }
+]
